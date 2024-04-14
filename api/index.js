@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
-
+require("dotenv").config();
 const app = express();
 const port = 3000;
 app.use(cors());
@@ -12,14 +12,12 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const jwt = require("jsonwebtoken");
+console.log("MongoDB URI:", process.env.MONGODB_URI);
 mongoose
-  .connect(
-    "mongodb+srv://jaisyashi1711:twitterclone@cluster0.efuuhdn.mongodb.net/",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("connected to mongoDB");
   })
