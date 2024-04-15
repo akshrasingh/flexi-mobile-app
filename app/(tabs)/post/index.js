@@ -52,7 +52,7 @@ const index = () => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.1.3:3000/profile/${userId}`
+        `http://192.168.153.80:3000/profile/${userId}`
       );
       const userData = response.data.user;
 
@@ -86,7 +86,7 @@ const index = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.1.3:3000/create",
+        "http://192.168.153.80:3000/create",
         postData
       );
 

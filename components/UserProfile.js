@@ -19,7 +19,7 @@ const UserProfile = ({ item, userId }) => {
     }
 
     try {
-      const response = await fetch("http://192.168.1.3:3000/follow", {
+      const response = await fetch("http://192.168.153.80:3000/follow", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,8 +97,8 @@ const UserProfile = ({ item, userId }) => {
           style={{
             marginLeft: "auto",
             marginRight: "auto",
-            borderColor: "blue",
-            borderWidth: 1,
+            borderColor: "#1A1148",
+            borderWidth: 1.5,
             borderRadius: 25,
             marginTop: 7,
             paddingHorizontal: 15,
@@ -106,7 +106,7 @@ const UserProfile = ({ item, userId }) => {
           }}
         >
           <Text
-            style={{ fontWeight: "600", color: "blue", textAlign: "center" }}
+            style={{ fontWeight: "600", color: "#1A1148", textAlign: "center" }}
           >
             Connect
           </Text>

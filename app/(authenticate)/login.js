@@ -41,7 +41,10 @@ const Login = () => {
         password: password,
       };
 
-      const response = await axios.post("http://192.168.1.7:3000/login", user);
+      const response = await axios.post(
+        "http://192.168.153.80:3000/login",
+        user
+      );
       const token = response.data.token;
       AsyncStorage.setItem("authToken", token);
       router.replace("/(tabs)/home");
@@ -57,9 +60,7 @@ const Login = () => {
       <View>
         <Image
           style={{ width: 150, height: 100, resizeMode: "contain" }}
-          source={{
-            uri: "https://i.pinimg.com/564x/7e/9e/6b/7e9e6bc100925c0644c1dd15fab5896b.jpg",
-          }}
+          source={logo}
         />
       </View>
 

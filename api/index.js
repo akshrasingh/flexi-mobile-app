@@ -8,7 +8,6 @@ require("dotenv").config();
 const app = express();
 const port = 3000;
 app.use(cors());
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const jwt = require("jsonwebtoken");
@@ -168,18 +167,54 @@ app.post("/follow", async (req, res) => {
 
 app.get("/follow/:userId", async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.params.userId;
 
     const user = await User.findById(userId)
-      .populate("followers", "name email")
-      .lean();
-
+      .populate("following", "name email profileImage")
+      .exec();
+    console.log(user);
     const followers = user.followers;
 
     res.json(followers);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+//add bookmark
+app.post("/bookmark/:postId", async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const userId = req.body.userId;
+    const post = req.body.post;
+    console.log(post);
+    // Find the user by ID and update the bookmarks array
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const index = user.bookmarks.findIndex(
+      (bookmark) => bookmark.id === postId
+    );
+    if (index === -1) {
+      // If post is not already bookmarked, add it
+      user.bookmarks.push(post);
+    } else {
+      // If post is already bookmarked, remove it
+      user.bookmarks.splice(index, 1);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Bookmark updated successfully",
+      bookmarks: user.bookmarks,
+    });
+  } catch (error) {
+    console.log("Error updating bookmark", error);
+    res.status(500).json({ message: "Error updating bookmark" });
   }
 });
 
@@ -299,5 +334,44 @@ app.post("/tweet/:id/comment", async (req, res) => {
   } catch (error) {
     console.log("error creating the comment", error);
     res.status(500).json({ message: "Error creating the post" });
+  }
+});
+
+//delete post
+app.delete("/delete/:postId", async (req, res) => {
+  try {
+    const postId = req.params.postId;
+
+    // Find the post by its ID and delete it
+    await Tweet.findByIdAndDelete(postId);
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.log("Error deleting the post", error);
+    res.status(500).json({ message: "Error deleting the post" });
+  }
+});
+
+//
+app.get("/checkBookmark/:userId/:postId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const postId = req.params.postId;
+
+    // Find the user by ID and check if the post is bookmarked
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the post is bookmarked by searching for its postId in the bookmarks array
+    const isBookmarked = user.bookmarks.some(
+      (bookmark) => bookmark.postId === postId
+    );
+
+    res.status(200).json({ isBookmarked });
+  } catch (error) {
+    console.log("Error checking bookmark status:", error);
+    res.status(500).json({ message: "Error checking bookmark status" });
   }
 });

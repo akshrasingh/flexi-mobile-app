@@ -55,7 +55,7 @@ const profile = () => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.1.3:3000/profile/${userId}`
+        `http://192.168.153.80:3000/profile/${userId}`
       );
       const userData = response.data.user;
 
@@ -69,7 +69,7 @@ const profile = () => {
   const handleSaveDescription = async () => {
     try {
       const response = await axios.put(
-        `http://192.168.1.3:3000/profile/${userId}`,
+        `http://192.168.153.80:3000/profile/${userId}`,
         {
           userDescription,
         }
@@ -115,13 +115,13 @@ const profile = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.1.10:3000/setprofile",
+        "http://192.168.153.80:3000/setprofile",
         postData
       );
 
       console.log("Profile Pic uploaded", response.data);
       if (response.status === 201) {
-        router.replace("/(tabs)/home/");
+        router.replace("/(tabs)/home/index");
       }
     } catch (error) {
       console.log("error creating post", error);
@@ -266,7 +266,7 @@ const profile = () => {
         </View>
 
         <Text style={{ marginTop: 12, fontWeight: "500", fontSize: 15 }}>
-          Youtube • Linkedin Member
+          Youtube • JobNest Member
         </Text>
         <Text style={{ fontSize: 15, color: "gray" }}>
           Bengaluru, Karnataka, India
@@ -294,6 +294,7 @@ const profile = () => {
           <Text style={{ color: "white", textAlign: "center" }}>Upload DP</Text>
         </Pressable>
         <Pressable
+          onPress={() => router.push("/home/bookmark")}
           style={{
             backgroundColor: "#0072b1",
             paddingVertical: 4,
@@ -301,9 +302,7 @@ const profile = () => {
             borderRadius: 25,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
-            Add Section
-          </Text>
+          <Text style={{ color: "white", textAlign: "center" }}>Bookmarks</Text>
         </Pressable>
       </View>
 
@@ -371,7 +370,7 @@ const profile = () => {
         </View>
       </View>
 
-      <Pressable onPress={logout}>
+      <Pressable onPress={logout} style={styles.button}>
         <Text>Logout</Text>
       </Pressable>
     </View>
@@ -380,4 +379,18 @@ const profile = () => {
 
 export default profile;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#007bff", // Blue color, you can change it to any color you want
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

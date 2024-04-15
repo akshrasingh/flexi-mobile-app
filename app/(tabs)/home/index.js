@@ -21,17 +21,26 @@ import moment from "moment";
 import CommentText from "../../../components/CommentText";
 
 import CommentModal from "../../../components/Comments";
-
+import SeeMore from "../../../components/SeeMore";
+import Bookmark from "../../../components/Bookmark";
+let likes = {};
 const fetchAllPosts = async (userId, setPosts) => {
   try {
-    const response = await axios.get(`http://192.168.1.3:3000/all`);
+    const response = await axios.get(`http://192.168.153.80:3000/all`);
     const fetchedPosts = response.data.posts.map((post) => ({
       ...post,
       isLiked: post.like.includes(userId), // Initialize liked state based on whether the user has liked the post
     }));
+    const counts = {};
+    fetchedPosts.forEach((post) => {
+      counts[post._id] = post.like.length;
+    });
+
     setPosts(fetchedPosts);
+    likes = counts;
   } catch (error) {
     console.log("error fetching posts", error);
+    return {};
   }
 };
 const index = () => {
@@ -41,7 +50,7 @@ const index = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showBox, setBox] = useState(false); // Set to true to always show the modal for demonstration purposes
   const [postId, setPostId] = useState(null); // Store the postId in this variable
-
+  const [likeCounts, setLikeCounts] = useState({});
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -66,11 +75,10 @@ const index = () => {
       fetchUserProfile();
     }
   }, [userId]);
-
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.1.3:3000/profile/${userId}`
+        `http://192.168.153.80:3000/profile/${userId}`
       );
       const userData = response.data.user;
 
@@ -80,12 +88,14 @@ const index = () => {
     }
   };
   useEffect(() => {
-    fetchAllPosts(userId, setPosts);
+    const likes = fetchAllPosts(userId, setPosts);
   }, [userId]);
+
   const handleCommentIconClick = (postId) => {
     setBox((prevBox) => !prevBox); // Toggle the showBox state
     setPostId(postId); // Set the postId in the variable
   };
+
   const targetPost = posts.find((post) => post._id === postId);
   const MAX_LINES = 2;
   const MAX_WORDS = 25;
@@ -94,10 +104,15 @@ const index = () => {
     setShowfullText(!showfullText);
   };
 
-  const handleLikePost = async (post, userId) => {
+  const handleLikePost = async (post, userId, isliked) => {
     try {
+      if (!isliked) {
+        likes[post._id] = likes[post._id] + 1;
+      } else {
+        likes[post._id] = likes[post._id] - 1;
+      }
       const response = await axios.post(
-        `http://192.168.1.3:3000/tweet/${post._id}/likeOrDislike`,
+        `http://192.168.153.80:3000/tweet/${post._id}/likeOrDislike`,
         { userId }
       );
       if (response.status === 200) {
@@ -120,13 +135,13 @@ const index = () => {
       console.log("Error liking/unliking the post", error);
     }
   };
-  console.log("popo", user);
+
   // Function to send a comment
   const sendComment = async (postId, commentText) => {
     try {
       // Send comment to server
       const response = await axios.post(
-        `http://192.168.1.3:3000/tweet/${postId}/comment`,
+        `http://192.168.153.80:3000/tweet/${postId}/comment`,
         { comments: { name: user.name, text: commentText } }
       );
 
@@ -149,6 +164,22 @@ const index = () => {
       console.log("Error refreshing data:", error);
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    try {
+      // Send a request to delete the post by its ID
+      const response = await axios.delete(
+        `http://192.168.153.80:3000/delete/${postId}`
+      );
+
+      // Remove the deleted post from the local state
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+
+      console.log(response.data.message); // Log success message
+    } catch (error) {
+      console.log("Error deleting the post", error);
     }
   };
 
@@ -178,26 +209,22 @@ const index = () => {
           />
         </Pressable>
 
-        <Pressable
+        <Text
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginHorizontal: 7,
+            marginLeft: 90,
+            fontSize: 19,
+            fontWeight: 800,
             gap: 10,
-            backgroundColor: "white",
             borderRadius: 3,
+            borderColor: "gray",
             height: 30,
             flex: 1,
           }}
         >
-          <AntDesign
-            style={{ marginLeft: 10 }}
-            name="search1"
-            size={20}
-            color="black"
-          />
-          <TextInput placeholder="search" />
-        </Pressable>
+          Lets JobNest
+        </Text>
 
         <Ionicons name="chatbox-ellipses-outline" size={24} color="black" />
       </View>
@@ -239,7 +266,7 @@ const index = () => {
                       fontWeight: "400",
                     }}
                   >
-                    Engineer Graduate | LinkedIn Member
+                    Engineer Graduate | JobNest Member
                   </Text>
                   <Text style={{ color: "gray" }}>
                     {moment(item.createdAt).format("MMMM Do YYYY")}
@@ -250,30 +277,19 @@ const index = () => {
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 10,
-                    marginLeft: 10,
+                    marginLeft: 30,
                   }}
                 >
-                  <Entypo name="dots-three-vertical" size={20} color="black" />
-
-                  <Feather name="x" size={20} color="black" />
+                  <Pressable onPress={() => handleDeletePost(item._id)}>
+                    <Feather name="x" size={20} color="black" />
+                  </Pressable>
                 </View>
               </View>
             </View>
             <View
               style={{ marginTop: 10, marginHorizontal: 10, marginBottom: 12 }}
             >
-              <Text
-                style={{ fontSize: 15 }}
-                numberOfLines={showfullText ? undefined : MAX_LINES}
-              >
-                {item?.description}
-              </Text>
-              {item?.description.split(/\s+/).length > MAX_WORDS &&
-                !showfullText && (
-                  <Pressable onPress={toggleShowFullText}>
-                    <Text>See more</Text>
-                  </Pressable>
-                )}
+              <SeeMore item={item} />
             </View>
             {item.imageUrl && (
               <Image
@@ -290,11 +306,13 @@ const index = () => {
                 marginVertical: 10,
               }}
             >
-              <Pressable onPress={() => handleLikePost(item, userId)}>
+              <Pressable
+                onPress={() => handleLikePost(item, userId, item.isLiked)}
+              >
                 <AntDesign
                   style={{ textAlign: "center" }}
                   name="like2"
-                  size={30}
+                  size={25}
                   color={item.isLiked ? "red" : "gray"}
                 />
 
@@ -306,7 +324,7 @@ const index = () => {
                     marginTop: 2,
                   }}
                 >
-                  Like
+                  {likes[item._id] || 0} Likes
                 </Text>
               </Pressable>
 
@@ -321,7 +339,7 @@ const index = () => {
               <Pressable onPress={() => handleCommentIconClick(item._id)}>
                 <FontAwesome
                   name="comment-o"
-                  size={30}
+                  size={25}
                   color="gray"
                   style={{ textAlign: "center" }}
                 />
@@ -337,31 +355,7 @@ const index = () => {
                 </Text>
               </Pressable>
 
-              <Pressable>
-                <Feather
-                  name="repeat"
-                  size={15}
-                  color="gray"
-                  style={{ textAlign: "center" }}
-                />
-
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontSize: 10,
-                    color: "gray",
-                    marginTop: 2,
-                  }}
-                >
-                  Repost
-                </Text>
-              </Pressable>
-              <Pressable>
-                <Feather name="send" size={15} color="gray" />
-                <Text style={{ marginTop: 2, fontSize: 10, color: "gray" }}>
-                  Send
-                </Text>
-              </Pressable>
+              <Bookmark userId={userId} post={item} />
             </View>
             <View
               style={{

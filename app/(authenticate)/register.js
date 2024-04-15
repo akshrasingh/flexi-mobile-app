@@ -16,6 +16,7 @@ import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "axios";
+import logo from "../../assets/logo.png";
 
 const register = () => {
   const [email, setEmail] = useState("");
@@ -33,7 +34,7 @@ const register = () => {
     };
 
     axios
-      .post("http://192.168.1.7:3000/register", user)
+      .post("http://192.168.153.80:3000/register", user)
       .then((response) => {
         console.log(response);
         Alert.alert(
@@ -64,9 +65,7 @@ const register = () => {
       <View>
         <Image
           style={{ width: 150, height: 100, resizeMode: "contain" }}
-          source={{
-            uri: "https://i.pinimg.com/564x/54/4f/a4/544fa4596c5046c5e4728f725fd53aec.jpg",
-          }}
+          source={logo}
         />
       </View>
 

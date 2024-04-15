@@ -14,12 +14,15 @@ import { AntDesign } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import UserProfile from "../../../components/UserProfile";
 import ConnectionRequest from "../../../components/ConnectionRequest";
+import profile from "../home/profile";
+import { useRouter } from "expo-router";
 
 const index = () => {
   const [userId, setUserId] = useState("");
   const [user, setUser] = useState();
   const [users, setUsers] = useState([]);
   const [friends, setFriends] = useState([]);
+  const router = useRouter();
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -48,7 +51,7 @@ const index = () => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.1.3:3000/profile/${userId}`
+        `http://192.168.153.80:3000/profile/${userId}`
       );
       const userData = response.data.user;
 
@@ -64,7 +67,7 @@ const index = () => {
   }, [userId]);
   const fetchUsers = async () => {
     axios
-      .get(`http://192.168.1.3:3000/users/${userId}`)
+      .get(`http://192.168.153.80:3000/users/${userId}`)
       .then((response) => {
         setUsers(response.data);
         // Log the fetched users here
@@ -81,7 +84,7 @@ const index = () => {
   const fetchFollower = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.1.3:3000/follow/${userId}`
+        `http://192.168.153.80:3000/follow/${userId}`
       );
 
       if (response.status === 200) {
@@ -91,7 +94,7 @@ const index = () => {
           followerIds.map(async (followerId) => {
             try {
               const followerResponse = await axios.get(
-                `http://192.168.1.3:3000/profile/${followerId}`
+                `http://192.168.153.80:3000/profile/${followerId}`
               );
 
               if (followerResponse.status === 200) {
@@ -100,6 +103,7 @@ const index = () => {
                   _id: followerData._id,
                   name: followerData.name,
                   email: followerData.email,
+                  profileImage: followerData.profileImage,
                 };
               }
             } catch (error) {
@@ -131,29 +135,13 @@ const index = () => {
           alignItems: "center",
           justifyContent: "space-between",
         }}
+        onPress={() => router.push("/network/connections")}
       >
         <Text style={{ fontSize: 16, fontWeight: "600" }}>
           Manage My Network
         </Text>
         <AntDesign name="arrowright" size={22} color="black" />
       </Pressable>
-
-      <View
-        style={{ borderColor: "#E0E0E0", borderWidth: 2, marginVertical: 10 }}
-      />
-
-      <View
-        style={{
-          marginTop: 10,
-          marginHorizontal: 10,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text style={{ fontSize: 16, fontWeight: "600" }}>Invitations (0)</Text>
-        <AntDesign name="arrowright" size={22} color="black" />
-      </View>
 
       <View
         style={{ borderColor: "#E0E0E0", borderWidth: 2, marginVertical: 10 }}
@@ -179,17 +167,15 @@ const index = () => {
             justifyContent: "space-between",
           }}
         >
-          <Text>Grow your network faster</Text>
-          <Entypo name="cross" size={24} color="black" />
+          <Text>
+            Grow your network faster. Find and contact the right people.
+          </Text>
         </View>
 
-        <Text>
-          Find and contact the right people. Plus see who's viewed your profile
-        </Text>
         <View
           style={{
-            backgroundColor: "#FFC72C",
-            width: 140,
+            backgroundColor: "#5545B1",
+            width: 180,
             paddingHorizontal: 10,
             paddingVertical: 5,
             borderRadius: 25,
@@ -199,7 +185,7 @@ const index = () => {
           <Text
             style={{ textAlign: "center", color: "white", fontWeight: "600" }}
           >
-            Try Premium
+            People you may know
           </Text>
         </View>
       </View>
